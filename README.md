@@ -19,11 +19,13 @@ on GitHub Pages (project site or custom domain).
 
 ## GitHub Pages
 
-1. Repo **Settings → Pages** → source **GitHub Actions**.
-2. The workflow `.github/workflows/pages.yml` publishes the repo root on
-   every push to `main`.
-3. First successful run publishes to
+1. Repo **Settings → Pages** → **Deploy from a branch**.
+2. Branch **main**, folder **/** (root). Save.
+3. Site URL:
    `https://stargatetelcom.github.io/stargatetelcom-homepage/`.
+
+Do not use root-absolute URLs (`/css/styles.css`). They break on a project
+Pages URL. This site uses relative paths only.
 
 Do not use root-absolute URLs (`/css/styles.css`). They break on a project
 Pages URL. This site uses relative paths only.
