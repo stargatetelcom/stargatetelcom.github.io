@@ -78,17 +78,44 @@
     scrollToTop();
   }
 
-  applyLandingScroll();
-  window.addEventListener("load", function () {
+  function openOfferCard(id) {
+    cards.forEach(function (card) {
+      if (card.id === id) {
+        card.classList.add("is-open");
+      } else {
+        card.classList.remove("is-open");
+      }
+    });
+  }
+
+  function openOfferFromHash() {
+    var id = window.location.hash.replace(/^#/, "");
+    if (id === "home" || id === "roam" || id === "boost" || id === "marketplace") {
+      openOfferCard(id);
+      return;
+    }
+    cards.forEach(function (card) {
+      card.classList.remove("is-open");
+    });
+  }
+
+  function applyLanding() {
     applyLandingScroll();
-    window.setTimeout(applyLandingScroll, 60);
+    openOfferFromHash();
+  }
+
+  applyLanding();
+  window.addEventListener("load", function () {
+    applyLanding();
+    window.setTimeout(applyLanding, 60);
   });
   window.addEventListener("pageshow", function (event) {
     if (event.persisted) {
       return;
     }
-    applyLandingScroll();
+    applyLanding();
   });
+  window.addEventListener("hashchange", openOfferFromHash);
 
   cards.forEach(function (card) {
     card.addEventListener("pointermove", function (event) {
@@ -107,10 +134,21 @@
         }
       });
       card.classList.toggle("is-open");
+      if (card.classList.contains("is-open") && card.id) {
+        history.replaceState(null, "", "#" + card.id);
+      }
     });
   });
 
   var offerWindows = Array.prototype.slice.call(document.querySelectorAll(".offer-window"));
+  offerWindows.forEach(function (item) {
+    item.addEventListener("click", function () {
+      var href = item.getAttribute("href") || "";
+      if (href.charAt(0) === "#") {
+        openOfferCard(href.slice(1));
+      }
+    });
+  });
   if (
     offerWindows.length &&
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches

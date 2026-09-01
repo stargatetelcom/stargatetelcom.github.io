@@ -645,7 +645,8 @@ p {
 
 .card:hover,
 .card:focus-visible,
-.card.is-open {
+.card.is-open,
+.card:target {
   transform: translateY(-7px);
   border-color: rgba(255, 255, 255, 1);
   box-shadow:
@@ -656,13 +657,15 @@ p {
 
 .card:hover::before,
 .card:focus-visible::before,
-.card.is-open::before {
+.card.is-open::before,
+.card:target::before {
   opacity: 1;
 }
 
 .card:hover::after,
 .card:focus-visible::after,
-.card.is-open::after {
+.card.is-open::after,
+.card:target::after {
   animation: sheen 0.9s ease;
 }
 
@@ -706,7 +709,8 @@ p {
 
 .card:hover .card-info,
 .card:focus-visible .card-info,
-.card.is-open .card-info {
+.card.is-open .card-info,
+.card:target .card-info {
   max-height: 9rem;
   opacity: 1;
   transform: translateY(0);
@@ -944,7 +948,8 @@ p {
     opacity: 0;
   }
 
-  .card.is-open .card-info {
+  .card.is-open .card-info,
+  .card:target .card-info {
     max-height: 9rem;
     opacity: 1;
     transform: translateY(0);
@@ -1045,6 +1050,7 @@ p {
   .card:hover::after,
   .card:focus-visible::after,
   .card.is-open::after,
+  .card:target::after,
   .gloss-frame img {
     animation: none;
   }
