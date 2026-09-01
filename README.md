@@ -16,10 +16,19 @@ http://localhost:8088
 
 Organization site. **Settings → Pages** → deploy **main** from **/** (root).
 
-- Site: https://stargatetelcom.github.io/
-- Custom domain: `www.stargatetelcom.com` (see `CNAME`). Do not enter a
+- Fallback: https://stargatetelcom.github.io/
+- Custom domain: `www.stargatetelcom.io` (see `CNAME`). Do not enter a
   `github.io` name in the custom-domain field.
-- DNS: CNAME `www` to `stargatetelcom.github.io`, DNS-only until GitHub
-  issues TLS, then Cloudflare SSL **Full**.
+
+Cloudflare DNS for `stargatetelcom.io` must be **DNS only** (grey cloud),
+not proxied:
+
+| Type | Name | Target |
+| --- | --- | --- |
+| CNAME | `www` | `stargatetelcom.github.io` |
+| A | `@` | `185.199.108.153` |
+| A | `@` | `185.199.109.153` |
+| A | `@` | `185.199.110.153` |
+| A | `@` | `185.199.111.153` |
 
 Use relative asset paths only.

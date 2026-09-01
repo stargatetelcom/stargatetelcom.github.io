@@ -1,0 +1,17 @@
+# Stargate Telcom
+
+> Decentralized internet at the edge. Fibre and satellite connectivity, present at the home and with you as you move.
+
+- Site: https://www.stargatetelcom.io/
+- Email: hello@stargatetelcom.com
+
+## Offerings
+
+- Home: fast fibre, dedicated to the household, always on.
+- Roam: buy once, use every hotspot on the network.
+- Boost: a named speed for a named window, then the session returns.
+- Marketplace: routers and network equipment on the same platform.
+
+## How it is delivered
+
+Distributed telecom at the core. Last mile is fibre and satellite. One identity across Home, Roam, Boost, and Marketplace.
