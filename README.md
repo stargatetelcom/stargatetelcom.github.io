@@ -12,23 +12,14 @@ python3 -m http.server 8088
 
 http://localhost:8088
 
-## GitHub Pages
+## Live
 
-Organization site. **Settings → Pages** → deploy **main** from **/** (root).
+Homepage: https://www.stargatetelcom.io/
 
-- Canonical site: https://www.stargatetelcom.io/
-- Fallback: https://stargatetelcom.github.io/
-- Custom domain in Pages: `www.stargatetelcom.io` (see `CNAME`).
+Published from this repo with GitHub Pages (`main` / root). The `.io` zone
+is on Cloudflare, CNAME-hosted to GitHub Pages. DNS, TLS, and the custom
+domain are already set.
 
-For the **.io** zone, point GitHub Pages with DNS only if you want GitHub
-to verify the domain:
-
-| Type | Name | Target |
-| --- | --- | --- |
-| CNAME | `www` | `stargatetelcom.github.io` |
-| A | `@` | `185.199.108.153` |
-| A | `@` | `185.199.109.153` |
-| A | `@` | `185.199.110.153` |
-| A | `@` | `185.199.111.153` |
+Fallback: https://stargatetelcom.github.io/
 
 Use relative asset paths only.

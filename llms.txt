@@ -7,7 +7,7 @@
 
 ## Offerings
 
-- Home: fast fibre, dedicated to the household, always on.
+- Home: fast fibre, a dedicated connection to your home, always on.
 - Roam: buy once, use every hotspot on the network.
 - Boost: a named speed for a named window, then the session returns.
 - Marketplace: routers and network equipment on the same platform.
