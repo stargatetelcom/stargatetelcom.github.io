@@ -2,7 +2,9 @@
 
 > Decentralized internet at the edge. Fibre and satellite connectivity, present at the home and with you as you move.
 
-- Site: https://www.stargatetelcom.io/
+- Canonical site: https://www.stargatetelcom.io/
+- Same site: https://www.stargatetelcom.com/
+- Also: https://stargatetelcom.io/ and https://stargatetelcom.com/
 - Email: hello@stargatetelcom.com
 
 ## Offerings
