@@ -572,7 +572,8 @@ p {
 
 .offer-window:hover,
 .offer-window:focus-visible,
-.offer-window.is-awake {
+.offer-window.is-awake,
+.offer-window.is-selected {
   transform: translateY(-10.8px);
   color: var(--ink);
   border-color: #d4a017;
@@ -616,7 +617,10 @@ p {
     inset 0 -1px 0 rgba(10, 37, 64, 0.04),
     var(--shadow);
   cursor: default;
-  transition: transform 0.32s ease, box-shadow 0.32s ease, border-color 0.32s ease;
+  transition:
+    transform 0.48s cubic-bezier(0.22, 1, 0.32, 1),
+    box-shadow 0.48s ease,
+    border-color 0.4s ease;
 }
 
 .card::before {
@@ -645,8 +649,7 @@ p {
 
 .card:hover,
 .card:focus-visible,
-.card.is-open,
-.card:target {
+.card.is-open {
   transform: translateY(-7px);
   border-color: rgba(255, 255, 255, 1);
   box-shadow:
@@ -657,16 +660,14 @@ p {
 
 .card:hover::before,
 .card:focus-visible::before,
-.card.is-open::before,
-.card:target::before {
+.card.is-open::before {
   opacity: 1;
 }
 
 .card:hover::after,
 .card:focus-visible::after,
-.card.is-open::after,
-.card:target::after {
-  animation: sheen 0.9s ease;
+.card.is-arriving::after {
+  animation: sheen 1.15s ease;
 }
 
 @keyframes sheen {
@@ -696,7 +697,7 @@ p {
   opacity: 0;
   overflow: hidden;
   transform: translateY(8px);
-  transition: max-height 0.38s ease, opacity 0.32s ease, transform 0.32s ease;
+  transition: max-height 0.48s ease, opacity 0.42s ease, transform 0.48s cubic-bezier(0.22, 1, 0.32, 1);
 }
 
 .card-info p {
@@ -709,8 +710,7 @@ p {
 
 .card:hover .card-info,
 .card:focus-visible .card-info,
-.card.is-open .card-info,
-.card:target .card-info {
+.card.is-open .card-info {
   max-height: 9rem;
   opacity: 1;
   transform: translateY(0);
@@ -734,7 +734,8 @@ p {
   transition: transform 0.28s ease, box-shadow 0.28s ease;
 }
 
-.contact-card:hover {
+.contact-card:hover,
+.contact-card.is-open {
   transform: translateY(-5px);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 1),
@@ -948,8 +949,7 @@ p {
     opacity: 0;
   }
 
-  .card.is-open .card-info,
-  .card:target .card-info {
+  .card.is-open .card-info {
     max-height: 9rem;
     opacity: 1;
     transform: translateY(0);
@@ -1040,6 +1040,7 @@ p {
   }
 
   .offer-window.is-awake,
+  .offer-window.is-selected,
   .offer-window:hover,
   .offer-window:focus-visible,
   .offer-window {
@@ -1049,8 +1050,7 @@ p {
 
   .card:hover::after,
   .card:focus-visible::after,
-  .card.is-open::after,
-  .card:target::after,
+  .card.is-arriving::after,
   .gloss-frame img {
     animation: none;
   }

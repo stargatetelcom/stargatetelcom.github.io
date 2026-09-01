@@ -29,20 +29,291 @@
     return "navigate";
   }
 
-  function scrollToId(id) {
+  function reducedMotion() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function isOfferId(id) {
+    return id === "home" || id === "roam" || id === "boost" || id === "marketplace";
+  }
+
+  var offerWindows = Array.prototype.slice.call(document.querySelectorAll(".offer-window"));
+  var contactCard = document.querySelector(".contact-card");
+  var revealToken = 0;
+  var offerPinned = false;
+
+  function scrollToId(id, smooth) {
     var target = document.getElementById(id);
     if (!target) {
       return false;
     }
-    target.scrollIntoView({ behavior: "auto", block: "start" });
+    target.scrollIntoView({
+      behavior: smooth && !reducedMotion() ? "smooth" : "auto",
+      block: "start"
+    });
     return true;
+  }
+
+  function afterScrollSettles(callback) {
+    var done = false;
+    function finish() {
+      if (done) {
+        return;
+      }
+      done = true;
+      callback();
+    }
+    if (reducedMotion()) {
+      finish();
+      return;
+    }
+    window.addEventListener("scrollend", finish, { once: true });
+    window.setTimeout(finish, 720);
+  }
+
+  function closeOfferCards() {
+    cards.forEach(function (card) {
+      card.classList.remove("is-open", "is-arriving");
+    });
+  }
+
+  function closeContact() {
+    if (contactCard) {
+      contactCard.classList.remove("is-open");
+    }
+  }
+
+  function highlightChip(id) {
+    offerWindows.forEach(function (item) {
+      var href = item.getAttribute("href") || "";
+      if (id && href === "#" + id) {
+        item.classList.add("is-selected");
+      } else {
+        item.classList.remove("is-selected");
+      }
+    });
+  }
+
+  function selectOfferChip(id) {
+    highlightChip(id);
+    offerPinned = Boolean(id);
+  }
+
+  function clearChipSelection() {
+    highlightChip(null);
+    offerPinned = false;
+  }
+
+  function sheenCard(card) {
+    card.classList.remove("is-arriving");
+    void card.offsetWidth;
+    card.classList.add("is-arriving");
+  }
+
+  function awakenCard(card) {
+    var box = card.getBoundingClientRect();
+    card.style.setProperty("--mx", box.width / 2 + "px");
+    card.style.setProperty("--my", box.height * 0.36 + "px");
+    card.classList.add("is-open");
+    sheenCard(card);
+  }
+
+  function awakenContact() {
+    closeContact();
+    if (!contactCard) {
+      return;
+    }
+    void contactCard.offsetWidth;
+    contactCard.classList.add("is-open");
+  }
+
+  var offerOrder = ["home", "roam", "boost", "marketplace"];
+  var tourTimer;
+  var tourIndex = 0;
+  var tourActive = false;
+  var tourPaused = false;
+  var TOUR_INTRO = 1200;
+  var TOUR_HOLD = 3800;
+  var TOUR_GAP = 900;
+  var TOUR_LOOP = 2400;
+
+  function offeringsVisible() {
+    var section = document.getElementById("offerings");
+    if (!section) {
+      return false;
+    }
+    var box = section.getBoundingClientRect();
+    var mid = box.top + box.height * 0.28;
+    return mid < window.innerHeight && box.bottom > 140;
+  }
+
+  function stopTour() {
+    tourActive = false;
+    tourPaused = false;
+    window.clearTimeout(tourTimer);
+    if (!offerPinned) {
+      closeOfferCards();
+      highlightChip(null);
+    }
+  }
+
+  function pauseTour() {
+    if (!tourActive) {
+      return;
+    }
+    tourPaused = true;
+    window.clearTimeout(tourTimer);
+    if (!offerPinned) {
+      closeOfferCards();
+      highlightChip(null);
+    }
+  }
+
+  function resumeTour() {
+    if (!tourActive || !tourPaused || offerPinned || reducedMotion() || document.hidden) {
+      return;
+    }
+    tourPaused = false;
+    window.clearTimeout(tourTimer);
+    tourTimer = window.setTimeout(openTourCard, 1300);
+  }
+
+  function openTourCard() {
+    if (!tourActive || tourPaused || offerPinned || document.hidden || reducedMotion()) {
+      return;
+    }
+    var id = offerOrder[tourIndex];
+    var card = document.getElementById(id);
+    if (!card) {
+      return;
+    }
+    closeOfferCards();
+    highlightChip(id);
+    awakenCard(card);
+    tourTimer = window.setTimeout(closeTourCard, TOUR_HOLD);
+  }
+
+  function closeTourCard() {
+    if (!tourActive || tourPaused || offerPinned) {
+      return;
+    }
+    closeOfferCards();
+    highlightChip(null);
+    tourIndex = (tourIndex + 1) % offerOrder.length;
+    tourTimer = window.setTimeout(
+      openTourCard,
+      tourIndex === 0 ? TOUR_LOOP : TOUR_GAP
+    );
+  }
+
+  function startTour() {
+    if (reducedMotion() || offerPinned || document.hidden) {
+      return;
+    }
+    if (tourActive && !tourPaused) {
+      return;
+    }
+    if (tourActive && tourPaused) {
+      resumeTour();
+      return;
+    }
+    restartTour();
+  }
+
+  function restartTour() {
+    if (reducedMotion() || offerPinned || document.hidden) {
+      return;
+    }
+    tourActive = true;
+    tourPaused = false;
+    tourIndex = 0;
+    window.clearTimeout(tourTimer);
+    closeOfferCards();
+    highlightChip(null);
+    tourTimer = window.setTimeout(openTourCard, TOUR_INTRO);
+  }
+
+  function revealOffer(id) {
+    var card = document.getElementById(id);
+    if (!card || !card.classList.contains("card")) {
+      return;
+    }
+
+    stopTour();
+    revealToken += 1;
+    var token = revealToken;
+    closeOfferCards();
+    closeContact();
+    selectOfferChip(id);
+
+    function play() {
+      if (token !== revealToken) {
+        return;
+      }
+      awakenCard(card);
+    }
+
+    if (reducedMotion()) {
+      scrollToId(id, false);
+      play();
+      return;
+    }
+
+    var box = card.getBoundingClientRect();
+    var inView = box.top < window.innerHeight * 0.72 && box.bottom > 110;
+
+    scrollToId(id, true);
+
+    if (inView) {
+      window.setTimeout(play, 70);
+      return;
+    }
+
+    afterScrollSettles(play);
+  }
+
+  function goToSection(id) {
+    if (isOfferId(id)) {
+      revealOffer(id);
+      return;
+    }
+
+    revealToken += 1;
+    stopTour();
+    closeOfferCards();
+    clearChipSelection();
+
+    if (id === "contact") {
+      scrollToId("contact", true);
+      afterScrollSettles(awakenContact);
+      return;
+    }
+
+    closeContact();
+
+    if (id === "offerings") {
+      scrollToId("offerings", true);
+      afterScrollSettles(restartTour);
+      return;
+    }
+
+    if (id === "top" || !id) {
+      window.scrollTo({
+        top: 0,
+        behavior: reducedMotion() ? "auto" : "smooth"
+      });
+    }
+  }
+
+  function fineHover() {
+    return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   }
 
   function scrollToOfferings() {
     if (window.location.hash !== "#offerings") {
       history.replaceState(null, "", "#offerings");
     }
-    scrollToId("offerings");
+    scrollToId("offerings", false);
   }
 
   function scrollToTop() {
@@ -55,67 +326,58 @@
   function applyLandingScroll() {
     var type = navigationType();
     var hash = window.location.hash;
+    var id = hash.replace(/^#/, "");
 
     if (type === "reload") {
       scrollToOfferings();
+      closeOfferCards();
+      closeContact();
+      clearChipSelection();
+      startTour();
       return;
     }
 
     if (type === "back_forward") {
-      if (hash === "#offerings") {
-        scrollToId("offerings");
-      } else if (hash && hash !== "#top") {
-        scrollToId(hash.slice(1));
-      }
+      goToSection(id);
       return;
     }
 
-    if (hash && hash !== "#top" && hash !== "#offerings") {
-      scrollToId(hash.slice(1));
+    if (isOfferId(id) || id === "contact" || id === "offerings") {
+      goToSection(id);
       return;
     }
 
     scrollToTop();
+    closeOfferCards();
+    closeContact();
+    clearChipSelection();
   }
 
-  function openOfferCard(id) {
-    cards.forEach(function (card) {
-      if (card.id === id) {
-        card.classList.add("is-open");
-      } else {
-        card.classList.remove("is-open");
-      }
-    });
-  }
-
-  function openOfferFromHash() {
+  applyLandingScroll();
+  window.addEventListener("load", function () {
     var id = window.location.hash.replace(/^#/, "");
-    if (id === "home" || id === "roam" || id === "boost" || id === "marketplace") {
-      openOfferCard(id);
+    if (isOfferId(id) || id === "contact") {
       return;
     }
-    cards.forEach(function (card) {
-      card.classList.remove("is-open");
-    });
-  }
-
-  function applyLanding() {
     applyLandingScroll();
-    openOfferFromHash();
-  }
-
-  applyLanding();
-  window.addEventListener("load", function () {
-    applyLanding();
-    window.setTimeout(applyLanding, 60);
+    window.setTimeout(applyLandingScroll, 60);
   });
   window.addEventListener("pageshow", function (event) {
     if (event.persisted) {
       return;
     }
-    applyLanding();
+    var id = window.location.hash.replace(/^#/, "");
+    if (isOfferId(id) || id === "contact") {
+      return;
+    }
+    applyLandingScroll();
   });
-  window.addEventListener("hashchange", openOfferFromHash);
+  window.addEventListener("popstate", function () {
+    var id = window.location.hash.replace(/^#/, "");
+    goToSection(id || "top");
+  });
+
+  var cardHoverCount = 0;
 
   cards.forEach(function (card) {
     card.addEventListener("pointermove", function (event) {
@@ -124,31 +386,93 @@
       card.style.setProperty("--my", event.clientY - box.top + "px");
     });
 
-    card.addEventListener("click", function () {
-      if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    card.addEventListener("pointerenter", function () {
+      if (!fineHover()) {
         return;
       }
-      cards.forEach(function (other) {
-        if (other !== card) {
-          other.classList.remove("is-open");
-        }
-      });
-      card.classList.toggle("is-open");
-      if (card.classList.contains("is-open") && card.id) {
+      cardHoverCount += 1;
+      pauseTour();
+    });
+
+    card.addEventListener("pointerleave", function () {
+      if (!fineHover()) {
+        return;
+      }
+      cardHoverCount = Math.max(0, cardHoverCount - 1);
+      if (cardHoverCount === 0) {
+        resumeTour();
+      }
+    });
+
+    card.addEventListener("click", function () {
+      if (fineHover()) {
+        return;
+      }
+      var opening = !card.classList.contains("is-open");
+      stopTour();
+      closeOfferCards();
+      closeContact();
+      if (opening && card.id) {
+        card.classList.add("is-open");
+        sheenCard(card);
+        selectOfferChip(card.id);
         history.replaceState(null, "", "#" + card.id);
+      } else {
+        clearChipSelection();
       }
     });
   });
 
-  var offerWindows = Array.prototype.slice.call(document.querySelectorAll(".offer-window"));
-  offerWindows.forEach(function (item) {
-    item.addEventListener("click", function () {
-      var href = item.getAttribute("href") || "";
-      if (href.charAt(0) === "#") {
-        openOfferCard(href.slice(1));
+  document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+    link.addEventListener("click", function (event) {
+      var href = link.getAttribute("href") || "";
+      var id = href.slice(1);
+      if (!id) {
+        return;
       }
+      event.preventDefault();
+      if (id === "top") {
+        history.pushState(null, "", window.location.pathname + window.location.search);
+        goToSection("top");
+        return;
+      }
+      if (window.location.hash !== href) {
+        history.pushState(null, "", href);
+      }
+      goToSection(id);
     });
   });
+
+  var offeringsSection = document.getElementById("offerings");
+  if (offeringsSection && "IntersectionObserver" in window) {
+    var offeringsObserver = new IntersectionObserver(function (entries) {
+      var entry = entries[0];
+      if (!entry) {
+        return;
+      }
+      if (entry.intersectionRatio >= 0.28) {
+        startTour();
+      } else if (entry.intersectionRatio < 0.1) {
+        stopTour();
+      }
+    }, { threshold: [0, 0.1, 0.28, 0.45] });
+    offeringsObserver.observe(offeringsSection);
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+      pauseTour();
+      return;
+    }
+    if (offeringsVisible() && !offerPinned) {
+      if (tourActive) {
+        resumeTour();
+      } else {
+        startTour();
+      }
+    }
+  });
+
   if (
     offerWindows.length &&
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -223,7 +547,7 @@
     }
 
     function pulse() {
-      if (document.hidden || hovered) {
+      if (document.hidden || hovered || offerPinned || tourActive) {
         timer = window.setTimeout(pulse, 900);
         return;
       }
@@ -254,7 +578,7 @@
       if (document.hidden) {
         window.clearTimeout(timer);
         clearAwake();
-      } else if (!hovered) {
+      } else if (!hovered && !offerPinned && !tourActive) {
         timer = window.setTimeout(pulse, between(1200, 2200));
       }
     });
