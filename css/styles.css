@@ -511,7 +511,11 @@ p {
 
 #offerings {
   scroll-margin-top: 5.9rem;
-  padding-top: 4.86rem;
+  padding-top: 2.65rem;
+}
+
+#offerings .section-head {
+  margin-bottom: 2rem;
 }
 
 .section-alt {
@@ -570,7 +574,6 @@ p {
     color 0.36s ease;
 }
 
-.offer-window:hover,
 .offer-window:focus-visible,
 .offer-window.is-awake,
 .offer-window.is-selected {
@@ -599,7 +602,8 @@ p {
 }
 
 .card,
-#contact {
+#contact,
+#offerings {
   scroll-margin-top: 5.9rem;
 }
 
@@ -647,24 +651,23 @@ p {
   opacity: 0;
 }
 
-.card:hover,
 .card:focus-visible,
 .card.is-open {
   transform: translateY(-7px);
-  border-color: rgba(255, 255, 255, 1);
+  border-color: rgba(10, 37, 64, 0.22);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 1),
-    0 28px 56px rgba(10, 37, 64, 0.18);
+    0 32px 58px rgba(10, 37, 64, 0.16),
+    0 8px 24px rgba(10, 37, 64, 0.07),
+    0 0 0 1px rgba(212, 160, 23, 0.04);
   outline: none;
 }
 
-.card:hover::before,
 .card:focus-visible::before,
 .card.is-open::before {
   opacity: 1;
 }
 
-.card:hover::after,
 .card:focus-visible::after,
 .card.is-arriving::after {
   animation: sheen 1.15s ease;
@@ -708,7 +711,6 @@ p {
   font-weight: 400;
 }
 
-.card:hover .card-info,
 .card:focus-visible .card-info,
 .card.is-open .card-info {
   max-height: 9rem;
@@ -734,12 +736,59 @@ p {
   transition: transform 0.28s ease, box-shadow 0.28s ease;
 }
 
-.contact-card:hover,
 .contact-card.is-open {
   transform: translateY(-5px);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 1),
     0 26px 50px rgba(10, 37, 64, 0.16);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .offer-window:hover {
+    transform: translateY(-10.8px);
+    color: var(--ink);
+    border-color: #d4a017;
+    border-width: 1.5px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      0 0 0 2px #0a2540,
+      0 0 0 3px rgba(212, 160, 23, 0.28),
+      0 18px 32px rgba(10, 37, 64, 0.42),
+      0 0 14px rgba(212, 160, 23, 0.35);
+    outline: none;
+    z-index: 1;
+  }
+
+  .card:hover {
+    transform: translateY(-7px);
+    border-color: rgba(10, 37, 64, 0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      0 32px 58px rgba(10, 37, 64, 0.16),
+      0 8px 24px rgba(10, 37, 64, 0.07),
+      0 0 0 1px rgba(212, 160, 23, 0.04);
+  }
+
+  .card:hover::before {
+    opacity: 1;
+  }
+
+  .card:hover::after {
+    animation: sheen 1.15s ease;
+  }
+
+  .card:hover .card-info {
+    max-height: 9rem;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .contact-card:hover {
+    transform: translateY(-5px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      0 26px 50px rgba(10, 37, 64, 0.16);
+  }
 }
 
 .contact-card .label {
@@ -877,7 +926,6 @@ p {
 
 @media (max-width: 900px) {
   .hero-grid,
-  .cards,
   .split {
     grid-template-columns: 1fr;
   }
@@ -937,20 +985,16 @@ p {
   }
 
   #offerings {
-    padding-top: 2.88rem;
+    padding-top: 2.7rem;
   }
 
   .card {
-    min-height: 0;
-  }
-
-  .card:hover .card-info {
-    max-height: 0;
-    opacity: 0;
+    min-height: 14.5rem;
+    scroll-margin-top: 6.4rem;
   }
 
   .card.is-open .card-info {
-    max-height: 9rem;
+    max-height: 12rem;
     opacity: 1;
     transform: translateY(0);
   }
@@ -986,6 +1030,21 @@ p {
 
   .brand strong {
     font-size: 0.78rem;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    min-height: 0;
+    scroll-margin-top: 6.8rem;
+  }
+
+  .offer-window.is-awake,
+  .offer-window.is-selected,
+  .offer-window:focus-visible {
+    transform: translateY(-7px);
   }
 
   .hero-offerings {

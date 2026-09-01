@@ -40,7 +40,7 @@
   var offerWindows = Array.prototype.slice.call(document.querySelectorAll(".offer-window"));
   var contactCard = document.querySelector(".contact-card");
   var revealToken = 0;
-  var offerPinned = false;
+  var landingOffer = false;
 
   function scrollToId(id, smooth) {
     var target = document.getElementById(id);
@@ -52,6 +52,68 @@
       block: "start"
     });
     return true;
+  }
+
+  function cardMostlyVisible(card) {
+    var box = card.getBoundingClientRect();
+    var topLimit = 88;
+    var bottomLimit = window.innerHeight - 24;
+    return box.top >= topLimit - 12 && box.bottom <= bottomLimit + 12;
+  }
+
+  function offeringsFramed() {
+    var section = document.getElementById("offerings");
+    if (!section) {
+      return false;
+    }
+    var box = section.getBoundingClientRect();
+    var header = 96;
+    return box.top >= header - 24 && box.top <= header + 120;
+  }
+
+  function nudgeCardIfClipped(card, done) {
+    if (!card || cardMostlyVisible(card) || reducedMotion()) {
+      if (done) {
+        done();
+      }
+      return;
+    }
+    card.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest"
+    });
+    if (done) {
+      afterScrollSettles(done);
+      return;
+    }
+  }
+
+  function frameOfferingsThenCard(card, done) {
+    var section = document.getElementById("offerings");
+
+    function afterFrame() {
+      nudgeCardIfClipped(card, done);
+    }
+
+    if (!section || offeringsFramed() || reducedMotion()) {
+      afterFrame();
+      return;
+    }
+
+    section.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+    afterScrollSettles(afterFrame);
+  }
+
+  function bringCardIntoView(card, done) {
+    if (offeringsFramed()) {
+      nudgeCardIfClipped(card, done);
+      return;
+    }
+    frameOfferingsThenCard(card, done);
   }
 
   function afterScrollSettles(callback) {
@@ -96,12 +158,10 @@
 
   function selectOfferChip(id) {
     highlightChip(id);
-    offerPinned = Boolean(id);
   }
 
   function clearChipSelection() {
     highlightChip(null);
-    offerPinned = false;
   }
 
   function sheenCard(card) {
@@ -151,10 +211,8 @@
     tourActive = false;
     tourPaused = false;
     window.clearTimeout(tourTimer);
-    if (!offerPinned) {
-      closeOfferCards();
-      highlightChip(null);
-    }
+    closeOfferCards();
+    highlightChip(null);
   }
 
   function pauseTour() {
@@ -163,14 +221,12 @@
     }
     tourPaused = true;
     window.clearTimeout(tourTimer);
-    if (!offerPinned) {
-      closeOfferCards();
-      highlightChip(null);
-    }
+    closeOfferCards();
+    highlightChip(null);
   }
 
   function resumeTour() {
-    if (!tourActive || !tourPaused || offerPinned || reducedMotion() || document.hidden) {
+    if (!tourActive || !tourPaused || landingOffer || reducedMotion() || document.hidden) {
       return;
     }
     tourPaused = false;
@@ -179,7 +235,7 @@
   }
 
   function openTourCard() {
-    if (!tourActive || tourPaused || offerPinned || document.hidden || reducedMotion()) {
+    if (!tourActive || tourPaused || landingOffer || document.hidden || reducedMotion()) {
       return;
     }
     var id = offerOrder[tourIndex];
@@ -189,12 +245,17 @@
     }
     closeOfferCards();
     highlightChip(id);
-    awakenCard(card);
-    tourTimer = window.setTimeout(closeTourCard, TOUR_HOLD);
+    bringCardIntoView(card, function () {
+      if (!tourActive || tourPaused || landingOffer) {
+        return;
+      }
+      awakenCard(card);
+      tourTimer = window.setTimeout(closeTourCard, TOUR_HOLD);
+    });
   }
 
   function closeTourCard() {
-    if (!tourActive || tourPaused || offerPinned) {
+    if (!tourActive || tourPaused || landingOffer) {
       return;
     }
     closeOfferCards();
@@ -207,7 +268,7 @@
   }
 
   function startTour() {
-    if (reducedMotion() || offerPinned || document.hidden) {
+    if (reducedMotion() || landingOffer || document.hidden) {
       return;
     }
     if (tourActive && !tourPaused) {
@@ -221,7 +282,7 @@
   }
 
   function restartTour() {
-    if (reducedMotion() || offerPinned || document.hidden) {
+    if (reducedMotion() || landingOffer || document.hidden) {
       return;
     }
     tourActive = true;
@@ -233,6 +294,27 @@
     tourTimer = window.setTimeout(openTourCard, TOUR_INTRO);
   }
 
+  function continueTourAfter(id) {
+    if (reducedMotion() || document.hidden) {
+      landingOffer = false;
+      return;
+    }
+    var idx = offerOrder.indexOf(id);
+    tourIndex = idx < 0 ? 0 : (idx + 1) % offerOrder.length;
+    tourActive = true;
+    tourPaused = false;
+    landingOffer = false;
+    window.clearTimeout(tourTimer);
+    tourTimer = window.setTimeout(function () {
+      if (!tourActive || tourPaused) {
+        return;
+      }
+      closeOfferCards();
+      highlightChip(null);
+      tourTimer = window.setTimeout(openTourCard, TOUR_GAP);
+    }, TOUR_HOLD);
+  }
+
   function revealOffer(id) {
     var card = document.getElementById(id);
     if (!card || !card.classList.contains("card")) {
@@ -240,36 +322,27 @@
     }
 
     stopTour();
+    landingOffer = true;
     revealToken += 1;
     var token = revealToken;
     closeOfferCards();
     closeContact();
-    selectOfferChip(id);
+    highlightChip(id);
 
     function play() {
       if (token !== revealToken) {
         return;
       }
       awakenCard(card);
+      continueTourAfter(id);
     }
 
     if (reducedMotion()) {
-      scrollToId(id, false);
-      play();
+      frameOfferingsThenCard(card, play);
       return;
     }
 
-    var box = card.getBoundingClientRect();
-    var inView = box.top < window.innerHeight * 0.72 && box.bottom > 110;
-
-    scrollToId(id, true);
-
-    if (inView) {
-      window.setTimeout(play, 70);
-      return;
-    }
-
-    afterScrollSettles(play);
+    frameOfferingsThenCard(card, play);
   }
 
   function goToSection(id) {
@@ -405,21 +478,13 @@
     });
 
     card.addEventListener("click", function () {
-      if (fineHover()) {
+      if (!card.id || !isOfferId(card.id)) {
         return;
       }
-      var opening = !card.classList.contains("is-open");
-      stopTour();
-      closeOfferCards();
-      closeContact();
-      if (opening && card.id) {
-        card.classList.add("is-open");
-        sheenCard(card);
-        selectOfferChip(card.id);
-        history.replaceState(null, "", "#" + card.id);
-      } else {
-        clearChipSelection();
+      if (window.location.hash !== "#" + card.id) {
+        history.pushState(null, "", "#" + card.id);
       }
+      revealOffer(card.id);
     });
   });
 
@@ -450,12 +515,12 @@
       if (!entry) {
         return;
       }
-      if (entry.intersectionRatio >= 0.28) {
+      if (entry.isIntersecting) {
         startTour();
-      } else if (entry.intersectionRatio < 0.1) {
+      } else {
         stopTour();
       }
-    }, { threshold: [0, 0.1, 0.28, 0.45] });
+    }, { threshold: [0, 0.04, 0.12, 0.28], rootMargin: "0px 0px -22% 0px" });
     offeringsObserver.observe(offeringsSection);
   }
 
@@ -464,7 +529,7 @@
       pauseTour();
       return;
     }
-    if (offeringsVisible() && !offerPinned) {
+    if (offeringsVisible()) {
       if (tourActive) {
         resumeTour();
       } else {
@@ -547,7 +612,7 @@
     }
 
     function pulse() {
-      if (document.hidden || hovered || offerPinned || tourActive) {
+      if (document.hidden || hovered || tourActive || landingOffer) {
         timer = window.setTimeout(pulse, 900);
         return;
       }
@@ -564,11 +629,17 @@
 
     offerWindows.forEach(function (item) {
       item.addEventListener("pointerenter", function () {
+        if (!fineHover()) {
+          return;
+        }
         hovered = true;
         window.clearTimeout(timer);
         clearAwake();
       });
       item.addEventListener("pointerleave", function () {
+        if (!fineHover()) {
+          return;
+        }
         hovered = false;
         timer = window.setTimeout(pulse, between(1600, 2800));
       });
@@ -578,7 +649,7 @@
       if (document.hidden) {
         window.clearTimeout(timer);
         clearAwake();
-      } else if (!hovered && !offerPinned && !tourActive) {
+      } else if (!hovered && !tourActive && !landingOffer) {
         timer = window.setTimeout(pulse, between(1200, 2200));
       }
     });
