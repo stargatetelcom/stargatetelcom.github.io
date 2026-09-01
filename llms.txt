@@ -5,8 +5,6 @@
 - Site: https://www.stargatetelcom.io/
 - Email: hello@stargatetelcom.com
 
-stargatetelcom.com redirects to stargatetelcom.io.
-
 ## Offerings
 
 - Home: fast fibre, dedicated to the household, always on.

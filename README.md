@@ -19,9 +19,6 @@ Organization site. **Settings → Pages** → deploy **main** from **/** (root).
 - Canonical site: https://www.stargatetelcom.io/
 - Fallback: https://stargatetelcom.github.io/
 - Custom domain in Pages: `www.stargatetelcom.io` (see `CNAME`).
-- `stargatetelcom.com` 301s to `.io` in Cloudflare (Redirect Rule on
-  the **.com** zone, orange cloud). Do not attach `.com` as a Pages
-  domain.
 
 For the **.io** zone, point GitHub Pages with DNS only if you want GitHub
 to verify the domain:
