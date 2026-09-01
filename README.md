@@ -16,12 +16,15 @@ http://localhost:8088
 
 Organization site. **Settings → Pages** → deploy **main** from **/** (root).
 
+- Site: https://www.stargatetelcom.io/
 - Fallback: https://stargatetelcom.github.io/
-- Custom domain: `www.stargatetelcom.com` (see `CNAME`). Do not enter a
+- Custom domain: `www.stargatetelcom.io` (see `CNAME`). Do not enter a
   `github.io` name in the custom-domain field.
+- `.com` redirects to `.io` in Cloudflare. Do not attach `.com` as a
+  Pages domain on this repo.
 
-Cloudflare DNS for `stargatetelcom.com` must be **DNS only** (grey cloud),
-not proxied:
+Cloudflare DNS for `stargatetelcom.io` must be **DNS only** (grey cloud)
+for GitHub to serve the site:
 
 | Type | Name | Target |
 | --- | --- | --- |
